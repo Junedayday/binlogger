@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package pbmysql;
+
+enum EventType {
+    UnknownEvent = 0;
+    InsertEvent = 1;
+    UpdateEvent = 2;
+    DeleteEvent = 3;
+}
+
+// one column values from old to new
+message ColumnValue {
+    // name of one column
+    string name = 1;
+    // value of the column,converted to bytes
+    bytes value = 2;
+    // value before
+    bytes before = 3;
+}
+
+// one event include
+message Event {
+    // schema name
+    string schema = 1;
+    // table name
+    string table = 2;
+    // event type
+    EventType et = 3;
+    // all columns names and values exclude id
+    repeated ColumnValue columns = 4;
+    // used as global unique identifier
+    string gtid = 5;
+    // timestamp for nano seconds
+    int64 nano_timestamp = 6;
+}
