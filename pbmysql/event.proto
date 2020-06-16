@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = ".;pbmysql";
+
 package pbmysql;
 
 enum EventType {
@@ -33,4 +35,6 @@ message Event {
     string gtid = 5;
     // timestamp for nano seconds
     int64 nano_timestamp = 6;
+    // primary key index
+    repeated int32 pk_columns = 7;
 }

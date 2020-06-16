@@ -1,0 +1,8 @@
+# Binlogger 工具
+
+## Docker
+
+docker build --target=binlogger -t binlogger .
+
+docker run -d -v $PWD/log:/app/log -v $PWD/config/binlogger.yaml:/app/binlogger.yaml --name=binlogger binlogger
+

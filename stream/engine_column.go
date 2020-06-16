@@ -43,6 +43,9 @@ func (ei *Engine) getColumns(e mysql.BinlogEvent) (msg *pbmysql.Event, err error
 func (ei *Engine) getInsertColumns(e mysql.BinlogEvent, rows mysql.Rows, tID uint64, msg *pbmysql.Event) (err error) {
 	msg.Et = pbmysql.EventType_InsertEvent
 	msg.Columns = make([]*pbmysql.ColumnValue, rows.DataColumns.Count())
+	for _, v := range ei.getTable(e.TableID(ei.getFormat())).PKColumns {
+		msg.PkColumns = append(msg.PkColumns, int32(v))
+	}
 
 	var pos, valueIndex = 0, 0
 	for i := 0; i < rows.DataColumns.Count(); i++ {
@@ -65,8 +68,11 @@ func (ei *Engine) getInsertColumns(e mysql.BinlogEvent, rows mysql.Rows, tID uin
 
 func (ei *Engine) getUpdateColumns(e mysql.BinlogEvent, rows mysql.Rows, tID uint64, msg *pbmysql.Event) (err error) {
 	msg.Et = pbmysql.EventType_UpdateEvent
-
 	msg.Columns = make([]*pbmysql.ColumnValue, rows.DataColumns.Count())
+	for _, v := range ei.getTable(e.TableID(ei.getFormat())).PKColumns {
+		msg.PkColumns = append(msg.PkColumns, int32(v))
+	}
+
 	var pos, valueIndex = 0, 0
 	for i := 0; i < rows.DataColumns.Count(); i++ {
 		msg.Columns[i] = new(pbmysql.ColumnValue)
@@ -104,8 +110,11 @@ func (ei *Engine) getUpdateColumns(e mysql.BinlogEvent, rows mysql.Rows, tID uin
 
 func (ei *Engine) getDeleteColumns(e mysql.BinlogEvent, rows mysql.Rows, tID uint64, msg *pbmysql.Event) (err error) {
 	msg.Et = pbmysql.EventType_DeleteEvent
-
 	msg.Columns = make([]*pbmysql.ColumnValue, rows.IdentifyColumns.Count())
+	for _, v := range ei.getTable(e.TableID(ei.getFormat())).PKColumns {
+		msg.PkColumns = append(msg.PkColumns, int32(v))
+	}
+
 	var pos, valueIndex = 0, 0
 	for i := 0; i < rows.IdentifyColumns.Count(); i++ {
 		msg.Columns[i] = new(pbmysql.ColumnValue)

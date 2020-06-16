@@ -24,36 +24,43 @@ var ddlMap = map[string]struct{}{
 }
 
 type Engine struct {
-	schemaName string
-	engine     *schema.Engine
-	matcher    map[uint64]*schema.Table
-	tm         map[uint64]*mysql.TableMap
-	f          mysql.BinlogFormat
+	engines map[string]*schema.Engine
+	matcher map[uint64]*schema.Table
+	tm      map[uint64]*mysql.TableMap
+	f       mysql.BinlogFormat
 }
 
-func NewEngine(cp *mysql.ConnParams) (Steamer, error) {
+func NewEngines(cps []*mysql.ConnParams) (Steamer, error) {
 	ei := new(Engine)
-	err := ei.init(cp)
-	return ei, err
+	ei.engines = make(map[string]*schema.Engine)
+	ei.matcher = make(map[uint64]*schema.Table)
+	ei.tm = make(map[uint64]*mysql.TableMap)
+	for _, v := range cps {
+		if err := ei.init(v); err != nil {
+			return nil, err
+		}
+	}
+	return ei, nil
 }
 
 func (ei *Engine) init(cp *mysql.ConnParams) (err error) {
-	ei.schemaName = cp.DbName
 	tbServer := tabletserver.NewTabletServerWithNilTopoServer(tabletenv.DefaultQsConfig)
-	ei.engine = schema.NewEngine(tbServer, tabletenv.TabletConfig{})
+	ei.engines[cp.DbName] = schema.NewEngine(tbServer, tabletenv.TabletConfig{})
 	cfg := dbconfigs.NewTestDBConfigs(*cp, *cp, cp.DbName)
-	ei.engine.InitDBConfig(cfg)
-	err = ei.engine.Open()
+	ei.engines[cp.DbName].InitDBConfig(cfg)
+	err = ei.engines[cp.DbName].Open()
 	if err != nil {
 		return
 	}
-	ei.matcher = make(map[uint64]*schema.Table)
-	ei.tm = make(map[uint64]*mysql.TableMap)
 	return
 }
 
 func (ei *Engine) Reload() (err error) {
-	err = ei.engine.Reload(context.Background())
+	for _, v := range ei.engines {
+		if err = v.Reload(context.Background()); err != nil {
+			return
+		}
+	}
 	return
 }
 
@@ -75,10 +82,6 @@ func (ei *Engine) ParseEvent(e mysql.BinlogEvent) (msg *pbmysql.Event, err error
 		return
 	}
 
-	// if ei.GetFormat().IsZero() {
-	// 	return
-	// }
-
 	if e.IsQuery() {
 		var q mysql.Query
 		q, err = e.Query(ei.getFormat())
@@ -92,7 +95,7 @@ func (ei *Engine) ParseEvent(e mysql.BinlogEvent) (msg *pbmysql.Event, err error
 		if _, ok := ddlMap[strings.ToLower(sql)]; ok {
 			err = fmt.Errorf("get a ddl : \n%s", q.SQL)
 			if err = ei.Reload(); err != nil {
-				panic("reload error " + err.Error())
+				panic("reload error" + err.Error())
 			}
 			return
 		}
@@ -104,10 +107,10 @@ func (ei *Engine) ParseEvent(e mysql.BinlogEvent) (msg *pbmysql.Event, err error
 		tm, err = e.TableMap(ei.getFormat())
 		if err != nil {
 			return
-		} else if tm.Database != ei.schemaName {
+		} else if _, ok := ei.engines[tm.Database]; !ok {
 			return
 		}
-		ei.addTable(tabId, tm.Name)
+		ei.addTable(tabId, tm.Database, tm.Name)
 		ei.setTableMap(tabId, tm)
 	}
 

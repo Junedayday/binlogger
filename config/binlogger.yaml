@@ -1,0 +1,13 @@
+mysql:
+  ip: "127.0.0.1"
+  port: 3306
+  user: "root"
+  password: "123456"
+  schemas:
+    - "test1"
+    - "test2"
+  timeout: 2
+kafka:
+  ip: "127.0.0.1"
+  port: 9092
+  topic: "testTopic"
