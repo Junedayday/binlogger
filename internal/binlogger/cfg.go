@@ -18,7 +18,7 @@ type mysqlCfg struct {
 }
 
 type kafkaCfg struct {
-	IP    string
+	IP    []string
 	Port  int
 	Topic string
 }

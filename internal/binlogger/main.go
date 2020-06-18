@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go-dev/kafka"
@@ -33,7 +34,11 @@ func main() {
 	cps := formatConn(cfg.Mysql)
 
 	var kp *kafka.Producer
-	kp, err = kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": fmt.Sprintf("%s:%d", cfg.Kafka.IP, cfg.Kafka.Port)})
+	var ips []string
+	for _, v := range cfg.Kafka.IP {
+		ips = append(ips, fmt.Sprintf("%s:%d", v, cfg.Kafka.Port))
+	}
+	kp, err = kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": strings.Join(ips, ",")})
 	if err != nil {
 		glog.Fatal(err)
 	}

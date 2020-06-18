@@ -8,6 +8,9 @@ mysql:
     - "test2"
   timeout: 2
 kafka:
-  ip: "127.0.0.1"
+  ip:
+    - "127.0.0.1"
+    - "127.0.0.2"
+    - "127.0.0.3"
   port: 9092
   topic: "testTopic"
