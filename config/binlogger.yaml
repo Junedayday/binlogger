@@ -6,7 +6,10 @@ mysql:
   schemas:
     - "test1"
     - "test2"
+  # minute
   timeout: 2
+  # id for slave conn to the mysql instance, must be unique
+  id: 1
 kafka:
   ip:
     - "127.0.0.1"

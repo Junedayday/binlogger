@@ -15,6 +15,7 @@ type mysqlCfg struct {
 	Schemas  []string
 	// time out for reading binlog: minutes
 	Timeout int
+	Id      int
 }
 
 type kafkaCfg struct {

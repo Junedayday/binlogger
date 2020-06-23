@@ -8,5 +8,5 @@ import (
 
 type Steamer interface {
 	Reload() error
-	ParseEvent(e mysql.BinlogEvent) (msg *pbmysql.Event, err error)
+	ParseEvent(e mysql.BinlogEvent) (msgs []*pbmysql.Event, err error)
 }

@@ -3,14 +3,17 @@
 ## Docker
 
 ```shell
-docker build --target=binlogger -t binlogger .
+docker build --target=binlogger -t junedayday/binlogger:latest .
 docker run -d -v $PWD/log:/app/log -v $PWD/config/binlogger.yaml:/app/binlogger.yaml --name=binlogger binlogger
+
+docker build --target=binlogsyncer -t junedayday/binlogsyncer:latest .
+docker run -d -v $PWD/log:/app/log -v $PWD/config/binlogsyncer.yaml:/app/binlogsyncer.yaml --name=binlogsyncer binlogsyncer
 ```
 
 ## Linux prepare
 
 ```shell
-yum update
+yum update 
 yum install -y yum-utils device-mapper-persistent-data lvm2
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum install -y docker-ce

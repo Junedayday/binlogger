@@ -64,7 +64,7 @@ func (ei *Engine) Reload() (err error) {
 	return
 }
 
-func (ei *Engine) ParseEvent(e mysql.BinlogEvent) (msg *pbmysql.Event, err error) {
+func (ei *Engine) ParseEvent(e mysql.BinlogEvent) (msgs []*pbmysql.Event, err error) {
 	if !e.IsValid() {
 		err = fmt.Errorf("not valid")
 		return
@@ -114,12 +114,8 @@ func (ei *Engine) ParseEvent(e mysql.BinlogEvent) (msg *pbmysql.Event, err error
 		ei.setTableMap(tabId, tm)
 	}
 
-	msg = new(pbmysql.Event)
 	if e.IsWriteRows() || e.IsUpdateRows() || e.IsDeleteRows() {
-		msg, err = ei.getColumns(e)
-	} else {
-		msg.Et = pbmysql.EventType_UnknownEvent
-		return
+		msgs, err = ei.getColumns(e)
 	}
 	return
 }

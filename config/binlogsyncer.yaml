@@ -1,0 +1,25 @@
+mysqlsrc:
+  ip: "127.0.0.1"
+  port: 3306
+  user: "root"
+  password: "123456"
+  schema: "test1"
+  # sync target table
+  tables:
+    - "testTable1"
+    - "testTable2"
+  # minute
+  timeout: 2
+  # id for slave conn to the mysql instance, must be unique
+  id: 1
+  # drop delete statement
+  nodelete: true
+# target mysql
+mysqltgt:
+  ip: "127.0.0.1"
+  port: 3306
+  user: "root"
+  password: "123456"
+  schema: "test2"
+  timeout: 120
+

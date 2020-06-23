@@ -19,6 +19,8 @@ message ColumnValue {
     bytes value = 2;
     // value before
     bytes before = 3;
+    bool value_null = 4;
+    bool before_null = 5;
 }
 
 // one event include
